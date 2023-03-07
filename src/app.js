@@ -1,7 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
-const handleError = require("./middlewares/handleError");
+const { handleError } = require("./middlewares/handleError");
+const ApiError = require("./utils/apiError");
 const app = express();
 
 // apply middleware
@@ -16,6 +17,9 @@ require("./dbs/mongodb.init");
 app.use("/v1/api", require("./routes"));
 
 // handle error
+app.use((req, res, next) => {
+  next(new ApiError(404, "Not Found"));
+});
 app.use(handleError);
 
 module.exports = app;
