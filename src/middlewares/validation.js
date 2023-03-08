@@ -14,6 +14,7 @@ const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 const checkObjectId = (field) =>
   param(field)
     .custom((value) => {
+      console.log({ value });
       if (!isObjectId(value)) return Promise.reject();
       return Promise.resolve();
     })

@@ -33,8 +33,10 @@ class ProjectService {
           msg: "Project not found!",
         },
       ]);
+
     const sectionsOfProject = await Section.find({ project: projectId }).lean();
-    for (let section in sectionsOfProject) {
+    for (let section of sectionsOfProject) {
+      // console.log({ section });
       const tasksOfSection = await Task.find({ section: section._id })
         .populate("section")
         .sort("-position")
