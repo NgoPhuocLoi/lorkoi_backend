@@ -8,5 +8,6 @@ router.use(
   verifyToken,
   require("./section.route")
 );
+router.use("/project/:projectId/task", verifyToken, require("./task.route"));
 
 module.exports = router;

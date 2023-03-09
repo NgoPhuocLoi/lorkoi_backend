@@ -7,7 +7,7 @@ const sectionSchema = new Schema(
   {
     project: {
       type: Schema.Types.ObjectId,
-      ref: "projects",
+      ref: "Project",
       required: true,
     },
     title: {

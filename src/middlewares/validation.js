@@ -1,4 +1,4 @@
-const { validationResult, param } = require("express-validator");
+const { validationResult, param, body } = require("express-validator");
 const { default: mongoose } = require("mongoose");
 const ApiError = require("../utils/apiError");
 const validate = (req, res, next) => {
@@ -11,8 +11,17 @@ const validate = (req, res, next) => {
 
 const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-const checkObjectId = (field) =>
+const checkParamObjectId = (field) =>
   param(field)
+    .custom((value) => {
+      console.log({ value });
+      if (!isObjectId(value)) return Promise.reject();
+      return Promise.resolve();
+    })
+    .withMessage("Invalid ProjectId");
+
+const checkBodyObjectId = (field) =>
+  body(field)
     .custom((value) => {
       console.log({ value });
       if (!isObjectId(value)) return Promise.reject();
@@ -23,5 +32,6 @@ const checkObjectId = (field) =>
 module.exports = {
   validate,
   isObjectId,
-  checkObjectId,
+  checkParamObjectId,
+  checkBodyObjectId,
 };

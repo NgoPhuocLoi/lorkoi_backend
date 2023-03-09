@@ -11,7 +11,10 @@ const handleError = (err, req, res, next) => {
 };
 
 const asyncHandler = (fn) => (req, res, next) => {
-  fn(req, res, next).catch(next);
+  fn(req, res, next).catch((err) => {
+    console.log(err);
+    next(err);
+  });
 };
 
 module.exports = { handleError, asyncHandler };

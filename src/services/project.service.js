@@ -1,7 +1,4 @@
-const Project = require("../models/project.model");
-const Section = require("../models/section.model");
-const Task = require("../models/task.model");
-const SubTask = require("../models/subtask.model");
+const { Project, Section, Task, SubTask } = require("../models");
 const ApiError = require("../utils/apiError");
 
 class ProjectService {
@@ -36,7 +33,6 @@ class ProjectService {
 
     const sectionsOfProject = await Section.find({ project: projectId }).lean();
     for (let section of sectionsOfProject) {
-      // console.log({ section });
       const tasksOfSection = await Task.find({ section: section._id })
         .populate("section")
         .sort("-position")

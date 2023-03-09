@@ -1,7 +1,7 @@
 const { body } = require("express-validator");
 const SectionController = require("../controllers/section.controller");
 const { asyncHandler } = require("../middlewares/handleError");
-const { checkObjectId } = require("../middlewares/validation");
+const { checkParamObjectId } = require("../middlewares/validation");
 const { validate } = require("../middlewares/validation");
 
 const router = require("express").Router({ mergeParams: true });
@@ -9,7 +9,7 @@ const router = require("express").Router({ mergeParams: true });
 router.post(
   "/",
   body("title").notEmpty().withMessage("Section's title is required"),
-  checkObjectId("projectId"),
+  checkParamObjectId("projectId"),
   validate,
   asyncHandler(SectionController.create)
 );
@@ -17,17 +17,16 @@ router.post(
 router.put(
   "/:sectionId",
   body("title").notEmpty().withMessage("Section's title is required"),
-  checkObjectId("projectId"),
-  checkObjectId("sectionId"),
+  checkParamObjectId("projectId"),
+  checkParamObjectId("sectionId"),
   validate,
   asyncHandler(SectionController.update)
 );
 
 router.delete(
   "/:sectionId",
-  body("title").notEmpty().withMessage("Section's title is required"),
-  checkObjectId("projectId"),
-  checkObjectId("sectionId"),
+  checkParamObjectId("projectId"),
+  checkParamObjectId("sectionId"),
   validate,
   asyncHandler(SectionController.delete)
 );

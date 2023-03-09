@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { body } = require("express-validator");
 const ProjectController = require("../controllers/project.controller");
 const { asyncHandler } = require("../middlewares/handleError");
-const { validate, checkObjectId } = require("../middlewares/validation");
+const { validate, checkParamObjectId } = require("../middlewares/validation");
 
 router.post(
   "/",
@@ -15,7 +15,7 @@ router.get("/", asyncHandler(ProjectController.getAll));
 router.get("/pinned", asyncHandler(ProjectController.getPinnedProjects));
 router.get(
   "/:projectId",
-  checkObjectId("projectId"),
+  checkParamObjectId("projectId"),
   validate,
   asyncHandler(ProjectController.getOne)
 );
@@ -23,14 +23,14 @@ router.get(
 router.put("/position", asyncHandler(ProjectController.updatePosition));
 router.put(
   "/:projectId",
-  checkObjectId("projectId"),
+  checkParamObjectId("projectId"),
   validate,
   asyncHandler(ProjectController.update)
 );
 
 router.delete(
   "/:projectId",
-  checkObjectId("projectId"),
+  checkParamObjectId("projectId"),
   validate,
   asyncHandler(ProjectController.delete)
 );

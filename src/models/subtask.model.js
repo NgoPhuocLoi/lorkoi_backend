@@ -7,7 +7,7 @@ const subTaskSchema = new Schema(
   {
     task: {
       type: Schema.Types.ObjectId,
-      ref: "tasks",
+      ref: "Task",
       required: true,
     },
     title: {

@@ -1,9 +1,15 @@
-const Section = require("../models/section.model");
-const Task = require("../models/task.model");
-const SubTask = require("../models/subtask.model");
+const { Project, Section, Task, SubTask } = require("../models");
+const ApiError = require("../utils/apiError");
 
 class SectionService {
-  static async create({ projectId, title }) {
+  static async create(userId, projectId, title) {
+    const project = await Project.findOne({
+      _id: projectId,
+      owner: userId,
+    }).lean();
+    console.log({ project });
+    if (!project)
+      throw new ApiError(400, { errors: [{ msg: "Project not found" }] });
     const section = await Section.create({
       project: projectId,
       title,
@@ -13,8 +19,16 @@ class SectionService {
     return { section };
   }
 
-  static async update(sectionId, newSectionInfo) {
-    const section = await Section.findByIdAndUpdate(
+  static async update(projectId, sectionId, newSectionInfo) {
+    let section = await Section.findOne({
+      _id: sectionId,
+      project: projectId,
+    }).lean();
+
+    if (!section)
+      throw new ApiError(400, { errors: [{ msg: "Section not found" }] });
+
+    section = await Section.findByIdAndUpdate(
       sectionId,
       {
         $set: newSectionInfo,
@@ -23,11 +37,18 @@ class SectionService {
     );
 
     section._doc.tasks = [];
-
+    console.log({ section });
     return { section };
   }
 
-  static async delete(sectionId) {
+  static async delete(projectId, sectionId) {
+    const section = await Section.findOne({
+      _id: sectionId,
+      project: projectId,
+    }).lean();
+    if (!section)
+      throw new ApiError(400, { errors: [{ msg: "Section not found" }] });
+
     const tasksOfSection = await Task.find({ section: sectionId }).lean();
     for (let task in tasksOfSection) {
       await SubTask.deleteMany({ task: task._id });
