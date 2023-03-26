@@ -31,8 +31,35 @@ class TaskService {
     return { task };
   }
 
-  static async updatePosition(tasksList) {
-    // for(let key in )
+  static async updatePosition({
+    sourceList,
+    desList,
+    sourceSectionId,
+    desSectionId,
+  }) {
+    const sourceListReverse = sourceList.reverse();
+    const desListReverse = desList.reverse();
+    if (sourceSectionId !== desSectionId) {
+      for (let key in sourceListReverse) {
+        const task = sourceListReverse[key];
+        await Task.findByIdAndUpdate(task._id, {
+          $set: {
+            section: sourceSectionId,
+            position: key,
+          },
+        });
+      }
+    }
+
+    for (let key in desListReverse) {
+      const task = desListReverse[key];
+      await Task.findByIdAndUpdate(task._id, {
+        $set: {
+          section: desSectionId,
+          position: key,
+        },
+      });
+    }
   }
 
   static async delete(taskId) {

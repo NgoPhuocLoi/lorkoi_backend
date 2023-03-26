@@ -3,6 +3,7 @@ const UserController = require("../controllers/user.controller");
 const { body } = require("express-validator");
 const { validate } = require("../middlewares/validation");
 const { asyncHandler } = require("../middlewares/handleError");
+const { verifyToken } = require("../middlewares/tokenHandler");
 
 router.post(
   "/register",
@@ -26,6 +27,14 @@ router.post(
     .withMessage("Password must be at least 8 characters"),
   validate,
   asyncHandler(UserController.login)
+);
+
+router.get(
+  "/verify-token",
+  verifyToken,
+  asyncHandler((req, res) => {
+    res.status(200).json({ user: req.user });
+  })
 );
 
 module.exports = router;

@@ -22,7 +22,8 @@ class TaskController {
   }
 
   static async updatePosition(req, res) {
-    res.json({ msg: "Not be Supported yet :>" });
+    await TaskService.updatePosition(req.body);
+    res.json({ msg: "Updated" });
   }
 }
 
