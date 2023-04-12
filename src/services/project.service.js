@@ -46,7 +46,9 @@ class ProjectService {
   }
 
   static async getPinnedProjects(owner) {
-    const projects = await Project.find({ owner, pinned: true });
+    const projects = await Project.find({ owner, pinned: true }).sort(
+      "pinnedPosition"
+    );
     return { projects };
   }
 

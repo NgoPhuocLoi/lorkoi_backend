@@ -5,17 +5,18 @@ const { getInfoData } = require("../utils");
 const ApiError = require("../utils/apiError");
 
 class UserService {
-  static async register({ email, password, firstName, lastName, phone }) {
-    const holderUser = await User.findOne({ email }).lean();
-
-    if (holderUser) {
-      throw new ApiError(409, [
+  static async checkEmail(email) {
+    const holder = await User.findOne({ email }).lean();
+    if (holder || !email)
+      throw new ApiError(400, [
         {
           param: "email",
-          msg: "Email has already used!",
+          msg: "Email was existed!",
         },
       ]);
-    }
+  }
+
+  static async register({ email, password, firstName, lastName, phone }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       email,
@@ -38,7 +39,13 @@ class UserService {
     });
     console.log("tokens:: ", tokens);
     return {
-      user: getInfoData(newUser, ["email", "firstName", "lastName", "phone"]),
+      user: getInfoData(newUser, [
+        "email",
+        "firstName",
+        "lastName",
+        "phone",
+        "avatar",
+      ]),
       tokens,
     };
   }
@@ -66,9 +73,40 @@ class UserService {
     const tokens = generateTokens({ userId: user._id, email: user.email });
 
     return {
-      user: getInfoData(user, ["email", "firstName", "lastName", "phone"]),
+      user: getInfoData(user, [
+        "email",
+        "firstName",
+        "lastName",
+        "phone",
+        "avatar",
+      ]),
       tokens,
     };
+  }
+
+  static async getUser(userId) {
+    const user = await User.findById(userId);
+    if (!user)
+      throw new ApiError(400, [
+        {
+          msg: "User not found!",
+        },
+      ]);
+    return {
+      user: getInfoData(user, [
+        "email",
+        "firstName",
+        "lastName",
+        "phone",
+        "avatar",
+        "_id",
+      ]),
+    };
+  }
+
+  static async getAllUsers() {
+    const users = await User.find({}).lean().limit(10);
+    return { users };
   }
 }
 

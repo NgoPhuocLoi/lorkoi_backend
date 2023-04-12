@@ -17,6 +17,13 @@ router.post(
 );
 
 router.put(
+  "/position",
+  checkParamObjectId("projectId"),
+  validate,
+  asyncHandler(TaskController.updatePosition)
+);
+
+router.put(
   "/:taskId",
   checkParamObjectId("projectId"),
   checkParamObjectId("taskId"),
@@ -30,14 +37,6 @@ router.delete(
   checkParamObjectId("taskId"),
   validate,
   asyncHandler(TaskController.delete)
-);
-
-router.put(
-  "/position",
-  checkParamObjectId("projectId"),
-  checkParamObjectId("taskId"),
-  validate,
-  asyncHandler(TaskController.updatePosition)
 );
 
 module.exports = router;

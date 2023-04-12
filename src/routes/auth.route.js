@@ -29,12 +29,11 @@ router.post(
   asyncHandler(UserController.login)
 );
 
-router.get(
-  "/verify-token",
-  verifyToken,
-  asyncHandler((req, res) => {
-    res.status(200).json({ user: req.user });
-  })
+router.post(
+  "/check-email",
+  body("email").isEmail().withMessage("Invalid Email"),
+  validate,
+  asyncHandler(UserController.checkEmail)
 );
 
 module.exports = router;
