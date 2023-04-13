@@ -108,6 +108,18 @@ class UserService {
     const users = await User.find({}).lean().limit(10);
     return { users };
   }
+
+  static async update(userId, newData) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: newData,
+      },
+      { new: true }
+    );
+
+    return { user };
+  }
 }
 
 module.exports = UserService;

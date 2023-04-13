@@ -35,6 +35,11 @@ class UserController {
     const data = await UserService.getAllUsers();
     res.json({ data });
   }
+
+  static async update(req, res) {
+    const data = await UserService.update(req.params.userId, req.body);
+    res.json({ data });
+  }
 }
 
 module.exports = UserController;
