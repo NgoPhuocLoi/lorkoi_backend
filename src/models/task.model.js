@@ -22,9 +22,6 @@ const taskSchema = new Schema(
       type: Number,
       default: 0,
     },
-    assignees: {
-      type: [Schema.Types.ObjectId],
-    },
   },
   {
     timestamps: true,

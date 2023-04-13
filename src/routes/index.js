@@ -12,5 +12,6 @@ router.use(
   require("./section.route")
 );
 router.use("/project/:projectId/task", verifyToken, require("./task.route"));
+router.use("/subtask", verifyToken, require("./subtask.route"));
 
 module.exports = router;

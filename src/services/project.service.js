@@ -1,4 +1,5 @@
 const { Project, Section, Task, SubTask } = require("../models");
+const subtaskModel = require("../models/subtask.model");
 const ApiError = require("../utils/apiError");
 
 class ProjectService {
@@ -37,6 +38,11 @@ class ProjectService {
         .populate("section")
         .sort("-position")
         .lean();
+      for (let task of tasksOfSection) {
+        const subtasksOfTask = await SubTask.find({ task: task._id }).lean();
+
+        task.subTasks = subtasksOfTask;
+      }
       section.tasks = tasksOfSection;
     }
     project.sections = sectionsOfProject;
