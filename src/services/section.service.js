@@ -3,13 +3,20 @@ const ApiError = require("../utils/apiError");
 
 class SectionService {
   static async create(userId, projectId, title) {
-    const project = await Project.findOne({
+    let project = await Project.findOne({
       _id: projectId,
       owner: userId,
     }).lean();
     console.log({ project });
-    if (!project)
-      throw new ApiError(400, { errors: [{ msg: "Project not found" }] });
+    if (!project) {
+      project = await Project.findOne({
+        _id: projectId,
+        members: { $elemMatch: { memberId: userId } },
+      }).lean();
+
+      if (!project)
+        throw new ApiError(400, { errors: [{ msg: "Project not found" }] });
+    }
     const section = await Section.create({
       project: projectId,
       title,

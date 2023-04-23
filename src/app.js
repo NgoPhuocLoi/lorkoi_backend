@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const { handleError } = require("./middlewares/handleError");
 const ApiError = require("./utils/apiError");
 const { getKey } = require("./utils");
+const ProjectService = require("./services/project.service");
 const app = express();
 
 // apply middleware
@@ -34,6 +35,7 @@ app.use(handleError);
 
 const server = http.createServer(app);
 
+//  Handle SocketIO
 const io = new Server(server, {
   cors: "http://localhost:3000",
 });
@@ -42,16 +44,21 @@ global.onlineUsers = new Map();
 io.on("connection", (socket) => {
   console.log(socket.id + " has connected");
   // global.chatSocket = socket;
-  socket.on("addUser", (userId) => {
+  socket.on("addUser", async (userId) => {
     onlineUsers.set(userId, socket.id);
-    console.log(onlineUsers);
+    try {
+      const { projects } = await ProjectService.getAll(userId);
+      projects.forEach((project) => {
+        socket.join(`project:${project._id}`);
+      });
+    } catch (error) {
+      console.log(error);
+    }
     io.emit("getUsers", Array.from(onlineUsers));
-    console.log(onlineUsers);
   });
 
   socket.on("sendMessage", ({ senderId, receiverId, message }) => {
     const receiverUserSocket = onlineUsers.get(receiverId);
-    console.log({ senderId, receiverId, message });
     if (receiverUserSocket) {
       socket.to(receiverUserSocket).emit("getMessage", {
         senderId,
@@ -60,6 +67,39 @@ io.on("connection", (socket) => {
       });
     }
   });
+
+  socket.on("createProject", ({ project, oldAndNewMembers }) => {
+    socket.join(`project:${project._id}`);
+    project.action = "add";
+    oldAndNewMembers.forEach((member) => {
+      const memberSocket = onlineUsers.get(member);
+      if (memberSocket) socket.to(memberSocket).emit("getProject", project);
+    });
+  });
+
+  socket.on("handleProject", ({ project, action }) => {
+    project.action = action;
+    socket.broadcast.to(`project:${project._id}`).emit("getProject", project);
+  });
+
+  socket.on("handleSection", ({ section, action }) => {
+    socket.broadcast
+      .to(`project:${section.project}`)
+      .emit("getSection", { section, action });
+  });
+
+  socket.on("handleTask", ({ task, action }) => {
+    socket.broadcast
+      .to(`project:${task.project}`)
+      .emit("getTask", { task, action });
+  });
+
+  socket.on("handleSubTask", ({ subTask, action }) => {
+    socket.broadcast
+      .to(`project:${subTask.project}`)
+      .emit("getSubTask", { subTask, action });
+  });
+
   socket.on("disconnect", () => {
     console.log(socket.id + " has disconnected");
     onlineUsers.delete(getKey(onlineUsers, socket.id));

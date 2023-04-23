@@ -1,4 +1,4 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 
 const DOCUMENT_NAME = "Project";
 const COLLECTION_NAME = "projects";
@@ -19,7 +19,12 @@ const projectSchema = new Schema(
       required: true,
     },
     members: {
-      type: [Schema.Types.ObjectId],
+      type: [
+        {
+          memberId: Schema.Types.ObjectId,
+          isEdited: Boolean,
+        },
+      ],
     },
     pinned: {
       type: Boolean,

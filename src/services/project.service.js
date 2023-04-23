@@ -1,14 +1,15 @@
 const { Project, Section, Task, SubTask } = require("../models");
+const projectModel = require("../models/project.model");
 const subtaskModel = require("../models/subtask.model");
 const ApiError = require("../utils/apiError");
 
 class ProjectService {
-  static async create({ name, color, owner }) {
+  static async create({ name, color, owner, members = [] }) {
     const project = await Project.create({
       name,
       color,
       owner,
-      members: [owner],
+      members,
     });
 
     return {
@@ -16,22 +17,33 @@ class ProjectService {
     };
   }
 
-  static async getAll(owner) {
-    const projects = await Project.find({ owner }).lean();
+  static async getAll(userId) {
+    const ownProjects = await Project.find({ owner: userId }).lean();
+    const otherProjects = await Project.find({
+      members: { $elemMatch: { memberId: userId } },
+    }).lean();
+
     return {
-      projects,
+      projects: [...ownProjects, ...otherProjects],
     };
   }
 
-  static async getOne(owner, projectId) {
-    const project = await Project.findOne({ owner, _id: projectId }).lean();
+  static async getOne(userId, projectId) {
+    let project = await Project.findOne({
+      owner: userId,
+      _id: projectId,
+    }).lean();
+    if (!project)
+      project = await Project.findOne({
+        _id: projectId,
+        members: { $elemMatch: { memberId: userId } },
+      }).lean();
     if (!project)
       throw new ApiError(404, [
         {
           msg: "Project not found!",
         },
       ]);
-
     const sectionsOfProject = await Section.find({ project: projectId }).lean();
     for (let section of sectionsOfProject) {
       const tasksOfSection = await Task.find({ section: section._id })
