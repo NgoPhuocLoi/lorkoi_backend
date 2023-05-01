@@ -19,20 +19,10 @@ const projectSchema = new Schema(
       required: true,
     },
     members: {
-      type: [
-        {
-          memberId: Schema.Types.ObjectId,
-          isEdited: Boolean,
-        },
-      ],
+      type: [Schema.Types.ObjectId],
     },
-    pinned: {
-      type: Boolean,
-      default: false,
-    },
-    pinnedPosition: {
-      type: Number,
-      default: 0,
+    pinnedUsers: {
+      type: [Schema.Types.ObjectId],
     },
   },
   {

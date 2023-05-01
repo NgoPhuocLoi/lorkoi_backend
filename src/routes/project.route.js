@@ -20,7 +20,6 @@ router.get(
   asyncHandler(ProjectController.getOne)
 );
 
-router.put("/position", asyncHandler(ProjectController.updatePosition));
 router.put(
   "/:projectId",
   checkParamObjectId("projectId"),

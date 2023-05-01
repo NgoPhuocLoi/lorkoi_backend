@@ -20,7 +20,7 @@ class ProjectService {
   static async getAll(userId) {
     const ownProjects = await Project.find({ owner: userId }).lean();
     const otherProjects = await Project.find({
-      members: { $elemMatch: { memberId: userId } },
+      members: userId,
     }).lean();
 
     return {
@@ -36,7 +36,7 @@ class ProjectService {
     if (!project)
       project = await Project.findOne({
         _id: projectId,
-        members: { $elemMatch: { memberId: userId } },
+        members: userId,
       }).lean();
     if (!project)
       throw new ApiError(404, [
@@ -63,35 +63,19 @@ class ProjectService {
     };
   }
 
-  static async getPinnedProjects(owner) {
-    const projects = await Project.find({ owner, pinned: true }).sort(
-      "pinnedPosition"
-    );
-    return { projects };
+  static async getPinnedProjects(userId) {
+    const onwProjects = await Project.find({
+      owner: userId,
+      pinnedUsers: userId,
+    }).lean();
+    const memberProjects = await Project.find({
+      members: userId,
+      pinnedUsers: userId,
+    }).lean();
+    return { projects: [...onwProjects, ...memberProjects] };
   }
 
   static async update(projectId, newProjectInfo) {
-    const { pinned } = newProjectInfo;
-    const currentProject = await Project.findById(projectId).lean();
-    if (pinned !== undefined && pinned !== currentProject.pinned) {
-      const pinnedProjects = await Project.find({
-        owner: currentProject.owner,
-        pinned: true,
-        _id: { $ne: projectId },
-      }).lean();
-      if (pinned) {
-        newProjectInfo.pinnedPosition =
-          pinnedProjects.length > 0 ? pinnedProjects.length : 0;
-      } else {
-        for (let key in pinnedProjects) {
-          const item = pinnedProjects[key];
-          await Project.findByIdAndUpdate(item._id, {
-            $set: { pinnedPosition: key },
-          });
-        }
-      }
-    }
-
     const project = await Project.findByIdAndUpdate(
       projectId,
       {
@@ -113,35 +97,7 @@ class ProjectService {
     }
     await Section.deleteMany({ project: projectId });
 
-    const currentProject = await Project.findById(projectId).lean();
-
-    if (currentProject.pinned) {
-      const pinnedProjects = await Project.find({
-        owner: currentProject.owner,
-        pinned: true,
-        _id: { $ne: projectId },
-      })
-        .lean()
-        .sort("pinnedPosition");
-
-      for (let key in pinnedProjects) {
-        const item = pinnedProjects[key];
-        await Project.findByIdAndUpdate(item._id, {
-          $set: { pinnedPosition: key },
-        });
-      }
-    }
-
     await Project.findByIdAndDelete(projectId);
-  }
-
-  static async updatePinnedPosition(projects) {
-    for (let key in projects) {
-      const item = projects[key];
-      await Project.findByIdAndUpdate(item._id, {
-        $set: { pinnedPosition: key },
-      });
-    }
   }
 }
 

@@ -11,7 +11,7 @@ class SectionService {
     if (!project) {
       project = await Project.findOne({
         _id: projectId,
-        members: { $elemMatch: { memberId: userId } },
+        members: userId,
       }).lean();
 
       if (!project)

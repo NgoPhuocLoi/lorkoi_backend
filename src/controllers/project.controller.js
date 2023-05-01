@@ -35,11 +35,6 @@ class ProjectController {
     await ProjectService.delete(req.params.projectId);
     res.status(200).json({ msg: "Deleted" });
   }
-  static async updatePosition(req, res) {
-    const { projects } = req.body;
-    await ProjectService.updatePinnedPosition(projects);
-    res.json({ msg: "Updated" });
-  }
 }
 
 module.exports = ProjectController;
